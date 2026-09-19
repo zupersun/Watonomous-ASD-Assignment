@@ -8,6 +8,9 @@ CostmapNode::CostmapNode() : Node("costmap"), costmap_(robot::CostmapCore(this->
   string_pub_ = this->create_publisher<std_msgs::msg::String>("/test_topic", 10);
   timer_ = this->create_wall_timer(std::chrono::milliseconds(500), std::bind(&CostmapNode::publishMessage, this));
   lidar_sub_ = this->create_subscription<sensor_msgs::msg::LaserScan>("/lidar", 10, std::bind(&CostmapNode::lidarCallback, this, std::placeholders::_1));
+  costmap_.initializeGrid();
+  RCLCPP_INFO(this->get_logger(), "Costmap ready: %d x %d at %.2f m/cell",
+  costmap_.getWidth(), costmap_.getHeight(), costmap_.getResolution());
 }
  
 // Define the timer to publish a message every 500ms
