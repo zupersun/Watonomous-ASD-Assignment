@@ -37,6 +37,8 @@ void CostmapNode::lidarCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg
     marked++;
   }
 
+  costmap_.inflateObstacle();
+
   RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "marked %d of %zu beams", marked, msg->ranges.size());
 }
  

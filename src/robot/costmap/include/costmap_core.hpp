@@ -15,6 +15,7 @@ class CostmapCore {
 
     void initializeGrid();
     void markObstacle(double range, double angle);
+    void inflateObstacle();
 
     std::vector<int8_t>& getGrid() { return grid_; }
     int getWidth() const { return width_; }
@@ -27,6 +28,8 @@ class CostmapCore {
     int width_;
     int height_;
     double resolution_;
+    double inflation_radius_;
+    int max_cost_;
 };
 
 }  
