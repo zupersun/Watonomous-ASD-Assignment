@@ -1,12 +1,24 @@
 #include "map_memory_node.hpp"
+#include <cmath>
 
 MapMemoryNode::MapMemoryNode() : Node("map_memory"), map_memory_(robot::MapMemoryCore(this->get_logger())) {
   costmap_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>("/costmap", 10, std::bind(&MapMemoryNode::costmapCallback, this, std::placeholders::_1));
+  odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("/odom/filtered", 10, std::bind(&MapMemoryNode::odomCallback, this, std::placeholders::_1));
 }
 
 void MapMemoryNode::costmapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg) {
   latest_costmap_ = *msg;
   costmap_received_ = true;
+}
+
+void MapMemoryNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+  robot_x_ = msg->pose.pose.position.x;
+  robot_y_ = msg->pose.pose.position.y;
+
+  const auto& q = msg->pose.pose.orientation;
+  robot_yaw_ = std::atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
+  
+  RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "robot at (%.2f, %.2f) yaw %.2f", robot_x_, robot_y_, robot_yaw_);
 }
 
 int main(int argc, char ** argv)
