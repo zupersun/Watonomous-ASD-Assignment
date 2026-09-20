@@ -1,6 +1,6 @@
 #include <chrono>
 #include <memory>
- 
+#include <cmath>
 #include "costmap_node.hpp"
  
 CostmapNode::CostmapNode() : Node("costmap"), costmap_(robot::CostmapCore(this->get_logger())) {
@@ -21,7 +21,24 @@ void CostmapNode::publishMessage() {
   string_pub_->publish(message);
 }
 
-void CostmapNode::lidarCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {RCLCPP_INFO(this->get_logger(), "Got %zu beams", msg->ranges.size());}
+void CostmapNode::lidarCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {
+  costmap_.initializeGrid();
+
+  int marked = 0;
+  for (size_t i = 0; i < msg->ranges.size(); i++) {
+    double range = msg->ranges[i];
+
+    if (std::isnan(range) || range < msg->range_min || range > msg->range_max) {
+      continue;
+    }
+
+    double angle = msg->angle_min + i * msg->angle_increment;
+    costmap_.markObstacle(range, angle);
+    marked++;
+  }
+
+  RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "marked %d of %zu beams", marked, msg->ranges.size());
+}
  
 int main(int argc, char ** argv)
 {

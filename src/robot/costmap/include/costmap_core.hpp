@@ -14,6 +14,7 @@ class CostmapCore {
     explicit CostmapCore(const rclcpp::Logger& logger);
 
     void initializeGrid();
+    void markObstacle(double range, double angle);
 
     std::vector<int8_t>& getGrid() { return grid_; }
     int getWidth() const { return width_; }
