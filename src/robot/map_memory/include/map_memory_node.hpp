@@ -22,6 +22,8 @@ class MapMemoryNode : public rclcpp::Node {
     void updateMap();
     rclcpp::TimerBase::SharedPtr timer_;
 
+    rclcpp::Publisher<nav_msgs::msg::OccupancyGrid>::SharedPtr map_pub_;
+
     nav_msgs::msg::OccupancyGrid latest_costmap_;
 
     bool costmap_received_ = false;

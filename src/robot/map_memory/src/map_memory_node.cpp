@@ -5,6 +5,7 @@ MapMemoryNode::MapMemoryNode() : Node("map_memory"), map_memory_(robot::MapMemor
   costmap_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>("/costmap", 10, std::bind(&MapMemoryNode::costmapCallback, this, std::placeholders::_1));
   odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("/odom/filtered", 10, std::bind(&MapMemoryNode::odomCallback, this, std::placeholders::_1));
   timer_ = this->create_wall_timer(std::chrono::seconds(1), std::bind(&MapMemoryNode::updateMap, this));
+  map_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>("/map", 10);
 }
 
 void MapMemoryNode::costmapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg) {
@@ -34,12 +35,26 @@ void MapMemoryNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
 }
 
 void MapMemoryNode::updateMap() {
-  if (!should_update_ || !costmap_received_) return;
+  if (should_update_ && costmap_received_) {
+    map_memory_.integrateCostmap(latest_costmap_, robot_x_, robot_y_, robot_yaw_);
+    should_update_ = false;
 
-  map_memory_.integrateCostmap(latest_costmap_, robot_x_, robot_y_, robot_yaw_);
-  should_update_ = false;
+    RCLCPP_INFO(this->get_logger(), "integrated costmap at (%.2f, %.2f)", robot_x_, robot_y_);
+  }
 
-  RCLCPP_INFO(this->get_logger(), "integrated costmap at (%.2f, %.2f)", robot_x_, robot_y_);
+  nav_msgs::msg::OccupancyGrid map_msg;
+
+  map_msg.header.stamp = this->get_clock()->now();
+  map_msg.header.frame_id = "sim_world";
+
+  map_msg.info.resolution = map_memory_.getResolution();
+  map_msg.info.width = map_memory_.getWidth();
+  map_msg.info.height = map_memory_.getHeight();
+  map_msg.info.origin.position.x = map_memory_.getOriginX();
+  map_msg.info.origin.position.y = map_memory_.getOriginY();
+  map_msg.info.origin.orientation.w = 1.0;
+  map_msg.data = map_memory_.getGlobalMap();
+  map_pub_->publish(map_msg);
 }
 
 int main(int argc, char ** argv) {
