@@ -18,11 +18,21 @@ void MapMemoryNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
   const auto& q = msg->pose.pose.orientation;
   robot_yaw_ = std::atan2(2.0 * (q.w * q.z + q.x * q.y), 1.0 - 2.0 * (q.y * q.y + q.z * q.z));
   
+  double dx = robot_x_ - last_x_;
+  double dy = robot_y_ - last_y_;
+  double distance = std::sqrt(dx * dx + dy * dy);
+
+  if (distance >= distance_threshold_ || first_update_) {
+    last_x_ = robot_x_;
+    last_y_ = robot_y_;
+    first_update_ = false;
+    should_update_ = true;
+  }
+
   RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "robot at (%.2f, %.2f) yaw %.2f", robot_x_, robot_y_, robot_yaw_);
 }
 
-int main(int argc, char ** argv)
-{
+int main(int argc, char ** argv) {
   rclcpp::init(argc, argv);
   rclcpp::spin(std::make_shared<MapMemoryNode>());
   rclcpp::shutdown();

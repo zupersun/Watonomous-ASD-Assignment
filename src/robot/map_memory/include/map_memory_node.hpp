@@ -23,6 +23,10 @@ class MapMemoryNode : public rclcpp::Node {
     bool costmap_received_ = false;
 
     double robot_x_ = 0.0, robot_y_ = 0.0, robot_yaw_ = 0.0;
+    double last_x_ = 0.0, last_y_ = 0.0;
+    double distance_threshold_ = 1.5;
+    bool should_update_ = false;
+    bool first_update_ = true;
 };
 
 #endif 
