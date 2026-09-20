@@ -19,7 +19,11 @@ class MapMemoryNode : public rclcpp::Node {
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
 
+    void updateMap();
+    rclcpp::TimerBase::SharedPtr timer_;
+
     nav_msgs::msg::OccupancyGrid latest_costmap_;
+
     bool costmap_received_ = false;
 
     double robot_x_ = 0.0, robot_y_ = 0.0, robot_yaw_ = 0.0;

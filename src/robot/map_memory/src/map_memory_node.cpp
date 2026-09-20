@@ -4,6 +4,7 @@
 MapMemoryNode::MapMemoryNode() : Node("map_memory"), map_memory_(robot::MapMemoryCore(this->get_logger())) {
   costmap_sub_ = this->create_subscription<nav_msgs::msg::OccupancyGrid>("/costmap", 10, std::bind(&MapMemoryNode::costmapCallback, this, std::placeholders::_1));
   odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>("/odom/filtered", 10, std::bind(&MapMemoryNode::odomCallback, this, std::placeholders::_1));
+  timer_ = this->create_wall_timer(std::chrono::seconds(1), std::bind(&MapMemoryNode::updateMap, this));
 }
 
 void MapMemoryNode::costmapCallback(const nav_msgs::msg::OccupancyGrid::SharedPtr msg) {
@@ -30,6 +31,15 @@ void MapMemoryNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
   }
 
   RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 1000, "robot at (%.2f, %.2f) yaw %.2f", robot_x_, robot_y_, robot_yaw_);
+}
+
+void MapMemoryNode::updateMap() {
+  if (!should_update_ || !costmap_received_) return;
+
+  map_memory_.integrateCostmap(latest_costmap_, robot_x_, robot_y_, robot_yaw_);
+  should_update_ = false;
+
+  RCLCPP_INFO(this->get_logger(), "integrated costmap at (%.2f, %.2f)", robot_x_, robot_y_);
 }
 
 int main(int argc, char ** argv) {
