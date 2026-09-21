@@ -16,6 +16,7 @@ void ControlNode::pathCallback(const nav_msgs::msg::Path::SharedPtr msg) {
 void ControlNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
   robot_x_ = msg->pose.pose.position.x;
   robot_y_ = msg->pose.pose.position.y;
+  robot_yaw_ = control_.extractYaw(msg->pose.pose.orientation);
   odom_received_ = true;
 }
 
