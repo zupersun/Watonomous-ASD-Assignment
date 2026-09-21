@@ -18,8 +18,10 @@ void PlannerNode::goalCallback(const geometry_msgs::msg::PointStamped::SharedPtr
   goal_x_ = msg->point.x;
   goal_y_ = msg->point.y;
   goal_received_ = true;
+  state_ = State::WAITING_FOR_ROBOT;
 
   RCLCPP_INFO(this->get_logger(), "new goal: (%.2f, %.2f)", goal_x_, goal_y_);
+  planAndPublish();
 }
 
 void PlannerNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
@@ -28,7 +30,20 @@ void PlannerNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
 }
 
 void PlannerNode::timerCallback() {
-  RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000, "map:%d goal:%d robot(%.2f, %.2f)", map_received_, goal_received_, robot_x_, robot_y_);
+  if (state_ != State::WAITING_FOR_ROBOT) return;
+
+  double dx = goal_x_ - robot_x_;
+  double dy = goal_y_ - robot_y_;
+  double distance = std::sqrt(dx * dx + dy * dy);
+
+  if (distance < goal_tolerance_) {
+    RCLCPP_INFO(this->get_logger(), "goal reached");
+    state_ = State::WAITING_FOR_GOAL;
+    goal_received_ = false;
+    return;
+  }
+
+  planAndPublish();
 }
 
 void PlannerNode::planAndPublish() {

@@ -9,6 +9,11 @@
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "planner_core.hpp"
 
+enum class State {
+  WAITING_FOR_GOAL,
+  WAITING_FOR_ROBOT
+};
+
 class PlannerNode : public rclcpp::Node {
   public:
     PlannerNode();
@@ -35,6 +40,7 @@ class PlannerNode : public rclcpp::Node {
     bool goal_received_ = false;
     double robot_x_ = 0.0, robot_y_ = 0.0;
     double goal_tolerance_ = 0.5;
+    State state_ = State::WAITING_FOR_GOAL;
 };
 
 #endif 
