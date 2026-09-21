@@ -31,6 +31,37 @@ void PlannerNode::timerCallback() {
   RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000, "map:%d goal:%d robot(%.2f, %.2f)", map_received_, goal_received_, robot_x_, robot_y_);
 }
 
+void PlannerNode::planAndPublish() {
+  if (!map_received_ || !goal_received_) return;
+
+  std::vector<robot::CellIndex> cells;
+  if (!planner_.planPath(current_map_, robot_x_, robot_y_, goal_x_, goal_y_, cells)) {
+    return;
+  }
+
+  nav_msgs::msg::Path path_msg;
+  path_msg.header.stamp = this->get_clock()->now();
+  path_msg.header.frame_id = current_map_.header.frame_id;   // "sim_world"
+
+  for (const robot::CellIndex& c : cells) {
+    double wx, wy;
+    planner_.gridToWorld(current_map_, c, wx, wy);
+
+    geometry_msgs::msg::PoseStamped pose;
+    pose.header = path_msg.header;
+    pose.pose.position.x = wx;
+    pose.pose.position.y = wy;
+    pose.pose.position.z = 0.0;
+    pose.pose.orientation.w = 1.0;
+
+    path_msg.poses.push_back(pose);
+  }
+
+  path_pub_->publish(path_msg);
+
+  RCLCPP_INFO(this->get_logger(), "published path with %zu waypoints", path_msg.poses.size());
+}
+
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
