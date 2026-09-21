@@ -34,4 +34,31 @@ bool ControlCore::findLookaheadPoint(const nav_msgs::msg::Path& path, double rob
   return true;
 }
 
+geometry_msgs::msg::Twist ControlCore::computeVelocity(
+  const geometry_msgs::msg::PoseStamped& lookahead,
+  double robot_x, double robot_y, double robot_yaw,
+  double linear_speed) const {
+
+geometry_msgs::msg::Twist cmd;
+
+double dx = lookahead.pose.position.x - robot_x;
+double dy = lookahead.pose.position.y - robot_y;
+
+double cos_yaw = std::cos(robot_yaw);
+double sin_yaw = std::sin(robot_yaw);
+double x_r =  dx * cos_yaw + dy * sin_yaw;   
+double y_r = -dx * sin_yaw + dy * cos_yaw;  
+
+double L_sq = x_r * x_r + y_r * y_r;
+
+if (L_sq < 1e-6) return cmd;                
+
+double curvature = 2.0 * y_r / L_sq;
+
+cmd.linear.x  = linear_speed;
+cmd.angular.z = linear_speed * curvature;
+
+return cmd;
+}
+
 }  

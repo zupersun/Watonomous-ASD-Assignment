@@ -5,6 +5,7 @@
 #include "geometry_msgs/msg/quaternion.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
 #include "nav_msgs/msg/path.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 
 namespace robot
 {
@@ -18,6 +19,8 @@ class ControlCore {
     double extractYaw(const geometry_msgs::msg::Quaternion& q) const;
 
     bool findLookaheadPoint(const nav_msgs::msg::Path& path, double robot_x, double robot_y, double lookahead, geometry_msgs::msg::PoseStamped& out) const;
+
+    geometry_msgs::msg::Twist computeVelocity(const geometry_msgs::msg::PoseStamped& lookahead, double robot_x, double robot_y, double robot_yaw, double linear_speed) const;
 
   private:
     rclcpp::Logger logger_;
