@@ -37,7 +37,7 @@ std::vector<CellIndex> PlannerCore::getNeighbors(
 
   for (int dy = -1; dy <= 1; dy++) {
     for (int dx = -1; dx <= 1; dx++) {
-      if (dx == 0 && dy == 0) continue;          // itself
+      if (dx == 0 && dy == 0) continue;         
 
       int nx = c.x + dx;
       int ny = c.y + dy;
@@ -45,7 +45,7 @@ std::vector<CellIndex> PlannerCore::getNeighbors(
       if (nx < 0 || nx >= static_cast<int>(map.info.width) ||
           ny < 0 || ny >= static_cast<int>(map.info.height)) continue;
 
-      if (map.data[ny * map.info.width + nx] >= 100) continue;   // wall
+      if (map.data[ny * map.info.width + nx] >= 100) continue; 
 
       out.emplace_back(nx, ny);
     }
@@ -62,12 +62,12 @@ void PlannerCore::reconstructPath(
   CellIndex c = goal;
   out_path.push_back(c);
 
-  while (came_from.count(c)) {      // walk backwards to the start
+  while (came_from.count(c)) {      
     c = came_from.at(c);
     out_path.push_back(c);
   }
 
-  std::reverse(out_path.begin(), out_path.end());   // start -> goal
+  std::reverse(out_path.begin(), out_path.end());   
 }
 
 bool PlannerCore::planPath(const nav_msgs::msg::OccupancyGrid& map,
@@ -101,17 +101,15 @@ bool PlannerCore::planPath(const nav_msgs::msg::OccupancyGrid& map,
       return true;
     }
 
-    if (closed.count(current.index)) continue;    // stale queue entry
+    if (closed.count(current.index)) continue;    
     closed.insert(current.index);
 
     for (const CellIndex& nb : getNeighbors(map, current.index)) {
       if (closed.count(nb)) continue;
 
-      // diagonal moves are longer than orthogonal ones
       bool diagonal = (nb.x != current.index.x) && (nb.y != current.index.y);
       double step = diagonal ? 1.41421356 : 1.0;
 
-      // inflated cells cost extra -- this is what keeps clearance
       double penalty = static_cast<double>(map.data[nb.y * map.info.width + nb.x]) / 10.0;
 
       double tentative_g = g_score[current.index] + step + penalty;
