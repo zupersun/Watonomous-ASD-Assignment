@@ -29,6 +29,7 @@ class CostmapCore {
     int height_;
     double resolution_;
     double inflation_radius_;
+    double lethal_radius_;
     int max_cost_;
 };
 

@@ -55,8 +55,11 @@ if (L_sq < 1e-6) return cmd;
 
 double curvature = 2.0 * y_r / L_sq;
 
-cmd.linear.x  = linear_speed;
-cmd.angular.z = linear_speed * curvature;
+double speed = linear_speed / (1.0 + 1.5 * std::abs(curvature));
+if (speed < 0.35) speed = 0.35;
+
+cmd.linear.x  = speed;
+cmd.angular.z = speed * curvature;
 
 return cmd;
 }

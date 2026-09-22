@@ -70,10 +70,7 @@ void PlannerCore::reconstructPath(
   std::reverse(out_path.begin(), out_path.end());   
 }
 
-bool PlannerCore::planPath(const nav_msgs::msg::OccupancyGrid& map,
-                           double start_x, double start_y,
-                           double goal_x, double goal_y,
-                           std::vector<CellIndex>& out_path) {
+bool PlannerCore::planPath(const nav_msgs::msg::OccupancyGrid& map, double start_x, double start_y, double goal_x, double goal_y, std::vector<CellIndex>& out_path) {
   CellIndex start, goal;
   if (!worldToGrid(map, start_x, start_y, start)) {
     RCLCPP_WARN(logger_, "start is outside the map");
@@ -110,7 +107,7 @@ bool PlannerCore::planPath(const nav_msgs::msg::OccupancyGrid& map,
       bool diagonal = (nb.x != current.index.x) && (nb.y != current.index.y);
       double step = diagonal ? 1.41421356 : 1.0;
 
-      double penalty = static_cast<double>(map.data[nb.y * map.info.width + nb.x]) / 10.0;
+      double penalty = static_cast<double>(map.data[nb.y * map.info.width + nb.x]) / 5.0;
 
       double tentative_g = g_score[current.index] + step + penalty;
 

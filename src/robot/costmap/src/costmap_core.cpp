@@ -5,7 +5,7 @@ namespace robot
 {
 
 CostmapCore::CostmapCore(const rclcpp::Logger& logger)
-  : logger_(logger), width_(300), height_(300), resolution_(0.1), inflation_radius_(1.0), max_cost_(100) {}
+  : logger_(logger), width_(300), height_(300), resolution_(0.1), inflation_radius_(1.5), lethal_radius_(0.8), max_cost_(100) {}
 
 void CostmapCore::initializeGrid() {
   grid_.assign(width_ * height_, 0);
@@ -44,7 +44,12 @@ void CostmapCore::inflateObstacle() {
         double dist = std::sqrt(dx * dx + dy * dy) * resolution_;
         if (dist > inflation_radius_) continue;
 
-        int cost = static_cast<int>(max_cost_ * (1.0 - dist / inflation_radius_));
+        int cost;
+        if (dist <= lethal_radius_) {
+          cost = max_cost_;
+        } else {
+          cost = static_cast<int>(99.0 * (1.0 - (dist - lethal_radius_) / (inflation_radius_ - lethal_radius_)));
+        }
         int i = ny * width_ + nx;
         if (cost > grid_[i]) grid_[i] = static_cast<int8_t>(cost);
       }
