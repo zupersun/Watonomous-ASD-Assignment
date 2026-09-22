@@ -2,9 +2,9 @@
 
 Four ROS 2 nodes. The robot drives itself to a clicked goal and avoids whatever it finds on the way. C++17, ROS 2 Humble, Gazebo, Docker.
 
-<video src="https://raw.githubusercontent.com/zupersun/Watonomous-ASD-Assignment/main/docs/demo.mp4" controls width="100%"></video>
+![Demo: the robot driving to a clicked goal](docs/demo.gif)
 
-*Click a goal. The robot maps, plans and drives there on its own. Also on [YouTube](https://youtu.be/u6Sl_1bKBFA).*
+*Click a goal. The robot maps, plans and drives there on its own. Full 78 s run on [YouTube](https://youtu.be/u6Sl_1bKBFA) or in [`docs/demo.mp4`](docs/demo.mp4).*
 
 ## What it does
 
