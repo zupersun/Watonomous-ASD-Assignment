@@ -5,7 +5,7 @@ namespace robot
 {
 
 CostmapCore::CostmapCore(const rclcpp::Logger& logger)
-  : logger_(logger), width_(300), height_(300), resolution_(0.1), inflation_radius_(1.5), lethal_radius_(0.8), max_cost_(100) {}
+  : logger_(logger), width_(300), height_(300), resolution_(0.1), inflation_radius_(2.2), lethal_radius_(1.4), max_cost_(100) {}
 
 void CostmapCore::initializeGrid() {
   grid_.assign(width_ * height_, 0);
