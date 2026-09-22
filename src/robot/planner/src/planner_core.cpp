@@ -32,7 +32,7 @@ double PlannerCore::heuristic(const CellIndex& a, const CellIndex& b) const {
 }
 
 std::vector<CellIndex> PlannerCore::getNeighbors(
-    const nav_msgs::msg::OccupancyGrid& map, const CellIndex& c) const {
+    const nav_msgs::msg::OccupancyGrid& map, const CellIndex& c, bool from_lethal) const {
   std::vector<CellIndex> out;
 
   for (int dy = -1; dy <= 1; dy++) {
@@ -45,7 +45,7 @@ std::vector<CellIndex> PlannerCore::getNeighbors(
       if (nx < 0 || nx >= static_cast<int>(map.info.width) ||
           ny < 0 || ny >= static_cast<int>(map.info.height)) continue;
 
-      if (map.data[ny * map.info.width + nx] >= 100) continue; 
+      if (map.data[ny * map.info.width + nx] >= 100 && !from_lethal) continue;   // wall, unless escaping one 
 
       out.emplace_back(nx, ny);
     }
@@ -101,7 +101,9 @@ bool PlannerCore::planPath(const nav_msgs::msg::OccupancyGrid& map, double start
     if (closed.count(current.index)) continue;    
     closed.insert(current.index);
 
-    for (const CellIndex& nb : getNeighbors(map, current.index)) {
+    bool from_lethal = map.data[current.index.y * map.info.width + current.index.x] >= 100;
+
+    for (const CellIndex& nb : getNeighbors(map, current.index, from_lethal)) {
       if (closed.count(nb)) continue;
 
       bool diagonal = (nb.x != current.index.x) && (nb.y != current.index.y);

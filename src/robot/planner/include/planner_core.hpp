@@ -53,7 +53,7 @@ class PlannerCore {
 
   private:
     double heuristic(const CellIndex& a, const CellIndex& b) const;
-    std::vector<CellIndex> getNeighbors(const nav_msgs::msg::OccupancyGrid& map, const CellIndex& c) const;
+    std::vector<CellIndex> getNeighbors(const nav_msgs::msg::OccupancyGrid& map, const CellIndex& c, bool from_lethal) const;
 
     void reconstructPath(
       const std::unordered_map<CellIndex, CellIndex, CellIndexHash>& came_from, 
