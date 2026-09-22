@@ -29,9 +29,9 @@ class ControlNode : public rclcpp::Node {
     double robot_x_ = 0.0, robot_y_ = 0.0, robot_yaw_ = 0.0;
     bool odom_received_ = false;
 
-    double lookahead_distance_ = 3.0;
-    double goal_tolerance_ = 0.3;
-    double linear_speed_ = 1.5;
+    double lookahead_distance_ = 1.0;
+    double goal_tolerance_ = 0.1;
+    double linear_speed_ = 0.5;
 };
 
 #endif
