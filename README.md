@@ -2,7 +2,7 @@
 
 Four ROS 2 nodes. The robot drives itself to a clicked goal and avoids whatever it finds on the way. C++17, ROS 2 Humble, Gazebo, Docker.
 
-https://github.com/zupersun/Watonomous-ASD-Assignment/raw/main/docs/demo.mp4
+<video src="https://raw.githubusercontent.com/zupersun/Watonomous-ASD-Assignment/main/docs/demo.mp4" controls width="100%"></video>
 
 *Click a goal. The robot maps, plans and drives there on its own. Also on [YouTube](https://youtu.be/u6Sl_1bKBFA).*
 
@@ -27,13 +27,9 @@ Apple Silicon: set `PLATFORM="arm64"` in `watod-config.sh` first. No lidar after
 
 All of these happened. In this order. Each one changed the code.
 
-**Orbiting at speed**
-- 2.0 m/s with a 1.0 m lookahead. The robot circled a 75 cm radius. Distance to goal never moved.
-- Curvature is 2y / L². A short lookahead at high speed overshoots the carrot every cycle.
-- Lookahead now scales with speed. About speed times two seconds.
-
 **Cutting corners into obstacles**
-- A long lookahead aims across the inside of a bend. Constant speed meant fastest exactly where it was least safe.
+- The robot chases a point ahead on the path. That point has to be further away at higher speed. Too close and the robot is always turning toward something right in front of it, so it circles instead of driving. I saw exactly that at 2.0 m/s.
+- But a far point aims across the inside of a bend. Constant speed meant fastest exactly where it was least safe.
 - Speed now drops with curvature. Full on straights. About half in a real corner. Angular velocity scales the same way so the turn radius holds.
 
 **Accelerating before the turn was done**
@@ -42,7 +38,8 @@ All of these happened. In this order. Each one changed the code.
 
 **Hugging walls**
 - Inflation was 1.0 m. Cost hit zero one metre out. The planner rode that line. Widening inflation just moved the line.
-- Penalty weight from ÷10 to ÷5. And a lethal zone. Cells within a set radius become impassable, not just expensive. A soft cost can be outbid by a long detour. A hard limit can't.
+- Penalty weight from ÷10 to ÷5. That helped a bit.
+- The real fix was something the assignment doesn't ask for. The assignment's inflation is a soft cost that fades with distance. I added a **lethal zone** on top of it. Cells within a set radius of an obstacle become impassable, not just expensive. A soft cost can always be outbid by a long enough detour. A hard limit can't.
 
 **Still scratching the big column**
 - The chassis is 2 by 1 m. A corner sweeps 1.12 m from centre. Lethal was 1.0 m. The corner reached 12 cm past the wall on turn in.
@@ -66,7 +63,7 @@ All of these happened. In this order. Each one changed the code.
 | curvature gain | 2.5 | corners land around 0.5 to 0.7 m/s |
 | speed floor | 0.35 m/s | never stall in a hairpin |
 | acceleration | 0.5 m/s² | finish turning before full speed |
-| lethal radius | 1.4 m | chassis corner sweep is 1.12 m |
+| lethal radius | 1.4 m | my addition, not in the assignment. Chassis corner sweep is 1.12 m |
 | inflation radius | 1.4 m | no soft band, see corridors above |
 | planner penalty | cost ÷ 5 | inflated cells avoided when a free route exists |
 | map update trigger | 1.5 m | assignment value |
